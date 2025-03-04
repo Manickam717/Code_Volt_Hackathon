@@ -1,7 +1,7 @@
 ##database user name 
 user = "root"
 #URL-encoded '@' as '%40'
-password = "Gd%402004dec"
+password = "2023"
 ##database name 
 db_name = "map"
 
