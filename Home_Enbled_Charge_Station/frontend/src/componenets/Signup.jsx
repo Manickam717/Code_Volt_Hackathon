@@ -15,7 +15,7 @@ const Signup = () => {
       return;
     }
     // Add signup logic here
-    navigate('/home'); // Redirect to Home
+    navigate('/'); // Redirect to Home or another page after signup
   };
 
   return (

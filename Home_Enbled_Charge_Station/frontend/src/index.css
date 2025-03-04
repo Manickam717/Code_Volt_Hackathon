@@ -1,1 +1,14 @@
 @import "tailwindcss";
+
+html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .element {
+    scroll-margin-top: 80px; /* Adjust this value based on your header height */
+  }
