@@ -1,7 +1,6 @@
 import './App.css'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-// import ChatGPTUser from './components/ChatGPTUser';
-import Map from './components/map';
+import Map from './componenets/map';
 
 function App() {
   return (
