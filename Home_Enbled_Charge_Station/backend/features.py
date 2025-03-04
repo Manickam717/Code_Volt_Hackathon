@@ -93,13 +93,14 @@ class Feature:
         time_stamp = time.time( )
         response = { 
             "lat" : choosed_home.location[0] ,
-            "lng" : choosed_home.location[0] ,
+            "lng" : choosed_home.location[1] ,
             "cost" : cost,
             "timestamp" : time_stamp ,
             "start" : time_stamp + 30,
             "stop" : time_stamp + 30 + charge_duration + self.buffer
         }
-        self.time_stamp_booking[time_stamp] = choosed_home 
+        self.time_stamp_booking[time_stamp] = choosed_home
+        print(response) 
         return response 
  
     

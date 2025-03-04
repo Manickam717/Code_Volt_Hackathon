@@ -36,6 +36,7 @@ def entry():
     data = request.get_json()
     location = (data.get("lat") ,data.get("lng") )
     response = feature.entry_request(location = location )
+    print(response)
     return jsonify(response)
 
 ##single cve page data
@@ -49,6 +50,7 @@ def nearesr_station():
     response = feature.second_request(location = location, 
                                       charge_duration = charge_duration ,
                                       mode = mode )
+    print("response:",response)
     return jsonify(response)
 
 @app.route("/confirmation" ,methods = ["POST"])
