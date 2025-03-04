@@ -273,16 +273,17 @@ const Dashboard = () => {
                 to={item.id}
                 smooth={true}
                 duration={500}
+                onClick={() => setActiveMenu(item.id)}
                 className={`w-full flex items-center px-6 py-3.5 transition-all duration-300 ease-in-out group relative
 ${
   activeMenu === item.id
     ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg translate-x-2"
     : "text-gray-600 hover:bg-blue-50 hover:text-blue-600"
-} !rounded-button whitespace-nowrap`}
+} !rounded-button whitespace-nowrap cursor-pointer`}
               >
                 <div className="relative flex items-center w-full">
                   <i
-                    className={`fas ${item.icon} w-5 transition-transform duration-300 group-hover:scale-110 ${activeMenu === item.id ? "animate-bounce" : ""}`}
+                    className={`fas ${item.icon} w-5 transition-transform duration-300 group-hover:scale-110`}
                   ></i>
                   <span className="ml-3 font-medium">{item.label}</span>
                   {item.badge && (
