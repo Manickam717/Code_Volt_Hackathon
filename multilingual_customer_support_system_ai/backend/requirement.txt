@@ -1,0 +1,8 @@
+langchain_text_splitters
+numpy
+google
+flask
+sentence_transformers
+pyngrok
+langdetect
+pycountry

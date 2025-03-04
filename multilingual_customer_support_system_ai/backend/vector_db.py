@@ -27,14 +27,12 @@ class VectorDB :
     self.chunks = [ ]
     for out in output : 
       self.chunks.append( out.page_content )
-    print("text_chunks : " ,self.chunks) 
   
   def __encode_chunks(self):
     self.embeddings = self.encoder.encode( self.chunks )
   
   def __cosine_similarity(self ,vector, vectors_list):
     assert isinstance(vector ,np.ndarray) and isinstance(vectors_list ,np.ndarray) ,"vector, vectors_list should np array"
-    print(vector.shape ,vectors_list.shape )
     assert vector.shape[0] == vectors_list.shape[1] ,"embeddings size mismatch"
     dot_product = np.dot(vectors_list, vector)
     norm_vector = np.linalg.norm(vector)

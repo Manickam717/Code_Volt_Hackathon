@@ -9,9 +9,11 @@ const ChatSupport = () => {
     },
   ]);
   const [newMessage, setNewMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (newMessage.trim() !== "") {
+      const timestamp = Date.now();
       const userMessage = {
         sender: "user",
         text: newMessage,
@@ -19,16 +21,44 @@ const ChatSupport = () => {
       };
       setMessages((prevMessages) => [...prevMessages, userMessage]);
       setNewMessage("");
+      setIsLoading(true);
 
-      // Simulate AI response
-      setTimeout(() => {
+      try {
+        const response = await fetch(`http://127.0.0.1:5000/chat/${timestamp}/dharsan/evlink`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ request: newMessage }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log(data);
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
         const aiResponse = {
           sender: "ai",
-          text: "Thank you for your message. We are here to assist you with any queries.",
+          text: data.response,
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         };
         setMessages((prevMessages) => [...prevMessages, aiResponse]);
-      }, 1000);
+      } catch (error) {
+        console.error('Error:', error);
+        const errorMessage = {
+          sender: "ai",
+          text: "Sorry, I'm having trouble connecting to the server.",
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        };
+        setMessages((prevMessages) => [...prevMessages, errorMessage]);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 

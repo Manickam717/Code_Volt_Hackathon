@@ -11,7 +11,7 @@ class UserService :
         self.vector_db = VectorDB( 
             document_link = os.path.join("business_docs" ,business_name + ".pdf"),
             k = 5 ,
-            min_similarity = 0.20 )
+            min_similarity = 0.00 )
         self.translator_obj = Language_translor( )
         self.responder = Responder( )
         self.conversation = [ ]
@@ -32,6 +32,8 @@ class UserService :
             if user_statement is None :
                 return "Given Language is not supported by the System" 
         
+        print("user_statement : " ,user_query)
+        
         ##___________________updating the conversation window
         self.conversation.append( {"role" : "user" ,"content" : user_query}  )
         self.conversation = self.conversation[ max( len(self.conversation) - self.conv_window_size , 0) : ]
@@ -43,11 +45,12 @@ class UserService :
         else:
             requirement = user_query
 
-        print("req : " ,requirement)
         relavent_chunks = self.vector_db.semantic_search(query = requirement)
-        print("vector db :" ,relavent_chunks)
+        print(1)
         response = self.responder.respond(conversation = self.conversation ,vdb = relavent_chunks)
-        print("plain response : ",response)
+        print(2)
+
+        print("response : " ,response)
 
         ##___________________updating the converstion
         self.conversation.append( {"role" : "system" ,"content" : response})

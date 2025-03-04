@@ -52,7 +52,7 @@ const Map = () => {
   // Custom marker icons - Fixed version
   const availableIcon = {
     path: "M 0 0 m -2, 0 a 2,2 0 1,0 4,0 a 2,2 0 1,0 -4,0",
-    scale: 12,
+    scale: 7,
     fillColor: '#00FF00',
     fillOpacity: 0.8,
     strokeColor: '#FFFFFF',
@@ -62,7 +62,7 @@ const Map = () => {
 
   const unavailableIcon = {
     path: "M 0 0 m -2, 0 a 2,2 0 1,0 4,0 a 2,2 0 1,0 -4,0",
-    scale: 12,
+    scale: 7,
     fillColor: '#FF0000',
     fillOpacity: 0.8,
     strokeColor: '#FFFFFF',
@@ -169,7 +169,7 @@ const Map = () => {
       };
       fetch('http://127.0.0.1:5000/nearest_station', {
         method: 'POST',
-        headers: {
+        headers: {  
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(bookingDetails),
