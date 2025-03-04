@@ -2,10 +2,12 @@ from database import home_charge ,engine
 from flask import Flask ,request ,jsonify
 from sqlalchemy.orm import sessionmaker
 from features import Feature
+from flask_cors import CORS
 
 
 ##creating flask instance  
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
 feature = Feature(max_time = 1800 ,buffer = 900 )  
 
 ##
