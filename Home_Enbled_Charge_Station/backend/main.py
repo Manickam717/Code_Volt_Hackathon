@@ -8,7 +8,7 @@ from flask_cors import CORS
 ##creating flask instance  
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
-feature = Feature(max_time = 1800 ,buffer = 900 )  
+feature = Feature(max_time = 2800 ,buffer = 900 )  
 
 ##
 Session = sessionmaker(bind=engine)
@@ -31,7 +31,7 @@ def home_station():
 
 
 ##home page route 
-@app.route("/home")
+@app.route("/home" ,methods = ["POST"])
 def entry():
     data = request.get_json()
     location = (data.get("lat") ,data.get("lng") )
@@ -39,10 +39,11 @@ def entry():
     return jsonify(response)
 
 ##single cve page data
-@app.route("/nearest_station")
+@app.route("/nearest_station" ,methods = ["POST"])
 def nearesr_station():
     data = request.get_json()
     location = (data.get("lat") ,data.get("lng") )
+    print("location:",location)
     charge_duration = data.get("charge_duration")
     mode = data.get("mode")
     response = feature.second_request(location = location, 
@@ -50,7 +51,7 @@ def nearesr_station():
                                       mode = mode )
     return jsonify(response)
 
-@app.route("/confirmation")
+@app.route("/confirmation" ,methods = ["POST"])
 def booking_confirmation():
     data = request.get_json()
     old_timestamp = data.get("time_stamp")
