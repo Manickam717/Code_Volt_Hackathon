@@ -103,6 +103,7 @@ const Map = () => {
             lat: position.coords.latitude,
             lng: position.coords.longitude
           };
+          console.log("userPosition:",userPosition)
           setCurrentPosition(userPosition);
           
           // Fetch charging stations after getting user position
@@ -120,6 +121,7 @@ const Map = () => {
             return response.json();
           })
           .then(data => {
+            console.log("data:",data)
             if (data.active && data.notactive) {
               const allStations = [
                 ...data.active.map(station => ({
