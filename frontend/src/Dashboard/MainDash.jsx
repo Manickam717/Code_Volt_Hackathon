@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import * as echarts from "echarts";
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import Map from '../componenets/map';
+import { Link } from 'react-scroll';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
     const [activeMenu, setActiveMenu] = useState("home");
@@ -16,6 +19,8 @@ const Dashboard = () => {
       },
     ]);
     const [newMessage, setNewMessage] = useState("");
+    const navigate = useNavigate();
+
     useEffect(() => {
       const loadingTimer = setTimeout(() => {
         setIsLoading(false);
@@ -179,6 +184,12 @@ const Dashboard = () => {
         }, 1000);
       }
     };
+    const handleRedirect = () => {
+      navigate('/home');
+      setTimeout(() => {
+        document.getElementById('chargingExperience').scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    };
     if (isLoading) {
       return (
         <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 overflow-hidden">
@@ -248,48 +259,26 @@ const Dashboard = () => {
           <nav className="mt-6 relative">
             {[
               { id: "home", icon: "fa-house", label: "Home", badge: "" },
-              {
-                id: "stations",
-                icon: "fa-bolt",
-                label: "Find Stations",
-                badge: "12",
-              },
-              {
-                id: "bookings",
-                icon: "fa-calendar",
-                label: "My Bookings",
-                badge: "2",
-              },
-              {
-                id: "transactions",
-                icon: "fa-money-bill",
-                label: "Transactions",
-                badge: "",
-              },
+              { id: "chargingExperience", icon: "fa-bolt", label: "Find Stations", badge: "12" },
+              { id: "evValues", icon: "fa-calendar", label: "New Booking", badge: "2" },
+              { id: "futureOfMobility", icon: "fa-gift", label: "Transforming Mobility", badge: "3" },
               { id: "wallet", icon: "fa-wallet", label: "Wallet", badge: "" },
-              {
-                id: "rewards",
-                icon: "fa-gift",
-                label: "Rewards & Offers",
-                badge: "3",
-              },
+              { id: "rewards", icon: "fa-gift", label: "Rewards & Offers", badge: "3" },
               { id: "support", icon: "fa-headset", label: "EV Assistance", badge: "Live" },
               { id: "profile", icon: "fa-user", label: "Profile", badge: "" },
               { id: "settings", icon: "fa-gear", label: "Settings", badge: "" },
             ].map((item, index) => (
-              <button
+              <Link
                 key={item.id}
-                onClick={() => setActiveMenu(item.id)}
+                to={item.id}
+                smooth={true}
+                duration={500}
                 className={`w-full flex items-center px-6 py-3.5 transition-all duration-300 ease-in-out group relative
 ${
   activeMenu === item.id
     ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg translate-x-2"
     : "text-gray-600 hover:bg-blue-50 hover:text-blue-600"
 } !rounded-button whitespace-nowrap`}
-                style={{
-                  animationDelay: `${index * 100}ms`,
-                  animation: "slideIn 0.5s ease-out forwards",
-                }}
               >
                 <div className="relative flex items-center w-full">
                   <i
@@ -311,7 +300,7 @@ transition-all duration-300`}
                 {activeMenu === item.id && (
                   <div className="absolute left-0 w-1 h-full bg-white rounded-r-full animate-pulse"></div>
                 )}
-              </button>
+              </Link>
             ))}
             <div
               className="absolute w-1 h-8 bg-blue-400 rounded-full transition-all duration-300 ease-in-out"
@@ -322,9 +311,9 @@ transition-all duration-300`}
                       (i) =>
                         [
                           "home",
-                          "stations",
-                          "bookings",
-                          "transactions",
+                          "chargingExperience",
+                          "evValues",
+                          "futureOfMobility",
                           "wallet",
                           "rewards",
                           "support",
@@ -557,40 +546,15 @@ transform: rotate(var(--rotation)) translateY(-120px) scale(0);
               </div>
             </div>
           )}
-          {activeMenu === "stations" && (
+          {activeMenu === "chargingExperience" && (
             <div className="p-8">
               <h1 className="text-3xl font-bold text-gray-800 mb-4">Find Stations</h1>
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-lg font-semibold mb-4">Nearby Charging Stations</h3>
-                <div className="space-y-4">
-                  {nearbyStations.map((station, index) => (
-                    <div
-                      key={station.id}
-                      className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-blue-50 transition-all duration-200 transform hover:-translate-x-1"
-                      style={{ animationDelay: `${index * 100}ms` }}
-                    >
-                      <div>
-                        <h4 className="font-medium">{station.name}</h4>
-                        <p className="text-sm text-gray-500">{station.distance}</p>
-                        <p className="text-sm text-gray-500">Rate: {station.rate}</p>
-                        <p className="text-sm text-gray-500">Chargers: {station.chargers}</p>
-                        <p className="text-sm text-gray-500">Reviews: {station.reviews}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-medium text-green-600">
-                          {station.available} Available
-                        </p>
-                        <button className="mt-2 px-4 py-1 bg-blue-600 text-white text-sm rounded-full hover:bg-blue-700 transition-colors duration-200 !rounded-button whitespace-nowrap">
-                          Book Now
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <Map />
               </div>
             </div>
           )}
-          {activeMenu === "bookings" && (
+          {activeMenu === "evValues" && (
             <div className="p-8">
               <h1 className="text-3xl font-bold text-gray-800 mb-4">My Bookings</h1>
               <div className="bg-white rounded-lg shadow-md p-6">
@@ -621,66 +585,7 @@ transform: rotate(var(--rotation)) translateY(-120px) scale(0);
               </div>
             </div>
           )}
-          {activeMenu === "transactions" && (
-            <div className="p-8">
-              <h1 className="text-3xl font-bold text-gray-800 mb-4">Transactions</h1>
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-lg font-semibold mb-4">Recent Transactions</h3>
-                <div className="space-y-4">
-                  {recentTransactions.map((transaction, index) => (
-                    <div
-                      key={transaction.id}
-                      className="flex items-center justify-between p-4 border-b hover:bg-gray-50 transition-all duration-200"
-                      style={{ animationDelay: `${index * 100}ms` }}
-                    >
-                      <div>
-                        <h4 className="font-medium">{transaction.station}</h4>
-                        <p className="text-sm text-gray-500">{transaction.date} at {transaction.time}</p>
-                        <p className="text-sm text-gray-500">Method: {transaction.method}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-medium">${transaction.amount}</p>
-                        <span className="text-xs text-green-600">{transaction.status}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-          {activeMenu === "wallet" && (
-            <div className="p-8">
-              <h1 className="text-3xl font-bold text-gray-800 mb-4">Wallet</h1>
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-lg font-semibold mb-4">Current Balance</h3>
-                <p className="text-2xl font-bold text-gray-800">${currentBalance}</p>
-                <button className="mt-4 px-6 py-2 bg-blue-600 text-white text-sm rounded-full hover:bg-blue-700 transition-colors duration-200 !rounded-button whitespace-nowrap">
-                  Add Funds
-                </button>
-                <h3 className="text-lg font-semibold mt-6 mb-4">Transaction History</h3>
-                <div className="space-y-4">
-                  {recentTransactions.map((transaction, index) => (
-                    <div
-                      key={transaction.id}
-                      className="flex items-center justify-between p-4 border-b hover:bg-gray-50 transition-all duration-200"
-                      style={{ animationDelay: `${index * 100}ms` }}
-                    >
-                      <div>
-                        <h4 className="font-medium">{transaction.station}</h4>
-                        <p className="text-sm text-gray-500">{transaction.date} at {transaction.time}</p>
-                        <p className="text-sm text-gray-500">Method: {transaction.method}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-medium">${transaction.amount}</p>
-                        <span className="text-xs text-green-600">{transaction.status}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-          {activeMenu === "rewards" && (
+          {activeMenu === "futureOfMobility" && (
             <div className="p-8">
               <h1 className="text-3xl font-bold text-gray-800 mb-4">Rewards & Offers</h1>
               <div className="bg-white rounded-lg shadow-md p-6">
