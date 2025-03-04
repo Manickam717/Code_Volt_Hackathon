@@ -242,18 +242,11 @@ const Dashboard = () => {
         )}
         {/* Sidebar */}
         <div className="w-64 bg-white shadow-xl backdrop-blur-lg bg-opacity-90 transition-all duration-300 ease-in-out relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-blue-50 to-transparent opacity-50"></div>
+          
           <div className="p-6 border-b border-gray-100 relative">
             <div className="flex items-center space-x-3">
               <div className="relative">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center transform rotate-12 transition-transform duration-300 hover:rotate-0">
-                  <i className="fas fa-bolt text-white text-xl"></i>
-                </div>
-                <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
               </div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent hover:scale-105 transform transition-transform duration-300">
-                EV Charge
-              </h1>
             </div>
           </div>
           <nav className="mt-6 relative">

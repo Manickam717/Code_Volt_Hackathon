@@ -1,6 +1,20 @@
-import { GoogleMap, LoadScript, Marker, DirectionsRenderer } from '@react-google-maps/api';
+import { GoogleMap, LoadScript, Marker, DirectionsRenderer, InfoWindow } from '@react-google-maps/api';
 import React, { useState, useEffect } from 'react';
 import './map.css';
+
+// Add this new component for the custom alert
+const CustomAlert = ({ message, onClose }) => (
+  <div className="custom-alert">
+    <div className="custom-alert-content">
+      <div className="alert-icon">
+        <i className="fas fa-check-circle"></i>
+      </div>
+      <h3>Success!</h3>
+      <p>{message}</p>
+      <button onClick={onClose}>Close</button>
+    </div>
+  </div>
+);
 
 const Map = () => {
   const [currentPosition, setCurrentPosition] = useState(null);
@@ -15,6 +29,13 @@ const Map = () => {
   const [directions, setDirections] = useState(null);
   const [timestamp, setTimestamp] = useState(null);
   const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false);
+  const [selectedStation, setSelectedStation] = useState(null);
+  const [selectedUserLocation, setSelectedUserLocation] = useState(false);
+  const [stationDetails, setStationDetails] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [serverError, setServerError] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
   
   // Container style for the map
   const containerStyle = {
@@ -26,6 +47,45 @@ const Map = () => {
   const defaultCenter = {
     lat: 40.7128,
     lng: -74.0060
+  };
+
+  // Custom marker icons - Fixed version
+  const availableIcon = {
+    path: "M 0 0 m -2, 0 a 2,2 0 1,0 4,0 a 2,2 0 1,0 -4,0",
+    scale: 12,
+    fillColor: '#00FF00',
+    fillOpacity: 0.8,
+    strokeColor: '#FFFFFF',
+    strokeWeight: 2,
+    labelOrigin: { x: 0, y: -20 }
+  };
+
+  const unavailableIcon = {
+    path: "M 0 0 m -2, 0 a 2,2 0 1,0 4,0 a 2,2 0 1,0 -4,0",
+    scale: 12,
+    fillColor: '#FF0000',
+    fillOpacity: 0.8,
+    strokeColor: '#FFFFFF',
+    strokeWeight: 2,
+    labelOrigin: { x: 0, y: -20 }
+  };
+
+  // Custom directions renderer options - Fixed version
+  const directionsRendererOptions = {
+    polylineOptions: {
+      strokeColor: '#4285F4',
+      strokeWeight: 5,
+      strokeOpacity: 0.8,
+      icons: [{
+        icon: {
+          path: "M 0,-1 0,1",
+          strokeOpacity: 1,
+          scale: 4
+        },
+        offset: '50%',
+        repeat: '100px'
+      }]
+    }
   };
 
   useEffect(() => {
@@ -44,7 +104,6 @@ const Map = () => {
             lng: position.coords.longitude
           };
           setCurrentPosition(userPosition);
-          console.log("Current Position:", userPosition); // Log the current position
           
           // Fetch charging stations after getting user position
           fetch('http://127.0.0.1:5000/home', {
@@ -54,10 +113,13 @@ const Map = () => {
             },
             body: JSON.stringify(userPosition),
           })
-          .then(response => response.json())
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
           .then(data => {
-            console.log('Fetched data:', data); // Log the fetched data
-            // Check if data.active and data.notactive exist
             if (data.active && data.notactive) {
               const allStations = [
                 ...data.active.map(station => ({
@@ -70,19 +132,24 @@ const Map = () => {
                 }))
               ];
               setChargingStations(allStations);
-            } else {
-              console.error('Data structure is not as expected:', data);
             }
+            setIsLoading(false);
           })
-          .catch((error) => console.error('Error fetching stations:', error));
+          .catch((error) => {
+            console.error('Error fetching stations:', error);
+            setServerError(true);
+            setIsLoading(false);
+          });
         },
         (error) => {
           console.error('Error getting location:', error);
+          setIsLoading(false);
         },
         options
       );
     } else {
       console.error('Geolocation is not supported by this browser.');
+      setIsLoading(false);
     }
   }, []);
 
@@ -136,23 +203,12 @@ const Map = () => {
       })
       .then(response => response.json())
       .then(data => {
-        console.log('Payment response:', data);
         if (data.status === 'succes') {
-          console.log('Booking key:', data.key);
+          setAlertMessage(`Your booking key is: ${data.key}`);
+          setShowAlert(true);
           setBookingKey(data.key);
-          
-          // Alert the booking key
-          alert(`Your booking key is: ${data.key}`);
-          
-          // Optionally, force a re-render (not usually necessary)
-          setTimeout(() => {
-            setBookingKey(prev => prev);
-          }, 100);
-          
           setShowBookingDetails(false);
           setBookingResponse(null);
-          
-          // Navigate after successful payment
           calculateRoute();
         }
       })
@@ -196,9 +252,21 @@ const Map = () => {
 
   return (
     <div className="app-container">
-      
-
       <div className="map-container">
+        {isLoading && (
+          <div className="loading-overlay">
+            <div className="loading-spinner"></div>
+            <p>Loading map data...</p>
+          </div>
+        )}
+        
+        {serverError && (
+          <div className="error-overlay">
+            <p>Unable to connect to server. Please check if the backend server is running.</p>
+            <button onClick={() => window.location.reload()}>Retry</button>
+          </div>
+        )}
+
         <LoadScript
           googleMapsApiKey="AIzaSyDUjbhIrHL8w13btxnPI57DKMwrGRHxON8"
           onLoad={() => {
@@ -213,94 +281,215 @@ const Map = () => {
               center={currentPosition || defaultCenter}
               zoom={15}
               className="google-map"
+              options={{
+                styles: [
+                  {
+                    featureType: "all",
+                    elementType: "geometry",
+                    stylers: [{ color: "#242f3e" }]
+                  },
+                  {
+                    featureType: "all",
+                    elementType: "labels.text.stroke",
+                    stylers: [{ color: "#242f3e" }]
+                  },
+                  {
+                    featureType: "all",
+                    elementType: "labels.text.fill",
+                    stylers: [{ color: "#746855" }]
+                  },
+                  {
+                    featureType: "water",
+                    elementType: "geometry",
+                    stylers: [{ color: "#17263c" }]
+                  }
+                ]
+              }}
             >
               {currentPosition && (
                 <Marker
                   position={currentPosition}
                   icon={{
-                    path: window.google.maps.SymbolPath.CIRCLE,
+                    path: "M 0 0 m -2, 0 a 2,2 0 1,0 4,0 a 2,2 0 1,0 -4,0",
                     scale: 10,
                     fillColor: '#4285F4',
                     fillOpacity: 1,
                     strokeColor: '#ffffff',
                     strokeWeight: 2,
                   }}
+                  onClick={() => setSelectedUserLocation(true)}
                 />
               )}
 
-              {/* Charging station markers */}
               {chargingStations.map((station) => (
                 <Marker
                   key={`${station.position.lat},${station.position.lng}`}
                   position={station.position}
-                  title={station.name}
-                  icon={{
-                    url: station.available 
-                      ? 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
-                      : 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
+                  icon={station.available ? availableIcon : unavailableIcon}
+                  label={{
+                    text: station.available ? 'Available' : 'Occupied',
+                    color: '#FFFFFF',
+                    fontSize: '12px',
+                    fontWeight: 'bold'
                   }}
                   onClick={() => {
-                    alert(`${station.name}\nAvailable: ${station.available ? 'Yes' : 'No'}`);
+                    setSelectedStation(station);
+                    // Fetch station details
+                    fetch(`http://127.0.0.1:5000/station_details/${station.position.lat}/${station.position.lng}`)
+                      .then(response => response.json())
+                      .then(data => setStationDetails(data))
+                      .catch(error => console.error('Error fetching station details:', error));
                   }}
                 />
               ))}
 
-              {/* Add DirectionsRenderer */}
-              {directions && <DirectionsRenderer directions={directions} />}
+              {directions && (
+                <DirectionsRenderer 
+                  directions={directions} 
+                  options={directionsRendererOptions}
+                />
+              )}
+
+              {/* Station Info Window */}
+              {selectedStation && stationDetails && (
+                <InfoWindow
+                  position={selectedStation.position}
+                  onCloseClick={() => setSelectedStation(null)}
+                >
+                  <div className="station-info">
+                    <h3>Charging Station Details</h3>
+                    <p>Status: {selectedStation.available ? 'Available' : 'Occupied'}</p>
+                    <p>Charging Types: {stationDetails.chargingTypes.join(', ')}</p>
+                    <p>Power Output: {stationDetails.powerOutput} kW</p>
+                    <p>Price per kWh: ₹{stationDetails.pricePerKwh}</p>
+                    <p>Operating Hours: {stationDetails.operatingHours}</p>
+                  </div>
+                </InfoWindow>
+              )}
+
+              {/* User Location Info Window */}
+              {selectedUserLocation && (
+                <InfoWindow
+                  position={currentPosition}
+                  onCloseClick={() => setSelectedUserLocation(false)}
+                >
+                  <div className="user-info">
+                    <h3>Your Vehicle Details</h3>
+                    <p>Battery Level: 75%</p>
+                    <p>Range: 150 km</p>
+                    <p>Charging Type: Type 2</p>
+                    <p>Last Charged: 2 hours ago</p>
+                  </div>
+                </InfoWindow>
+              )}
             </GoogleMap>
           )}
         </LoadScript>
         <button className="book-button" onClick={handleBookClick}>Book</button>
 
-        {/* Booking Details Modal */}
-        {showBookingDetails && bookingResponse && (
+        {/* Enhanced Booking Modal */}
+        {showModal && (
           <div className="modal">
-            <div className="modal-content">
-              <h2>Booking Details</h2>
-              <p>Cost: ₹{bookingResponse.cost}</p>
-              <p>Start Time: {new Date(bookingResponse.start).toLocaleString()}</p>
-              <p>End Time: {new Date(bookingResponse.stop).toLocaleString()}</p>
-              <button onClick={handlePayment}>Pay</button>
-              <button onClick={() => setShowBookingDetails(false)}>Cancel</button>
+            <div className="modal-content booking-modal">
+              <div className="modal-header">
+                <h2>Book Charging Station</h2>
+                <button className="close-button" onClick={() => setShowModal(false)}>
+                  <i className="fas fa-times"></i>
+                </button>
+              </div>
+              <div className="modal-body">
+                <div className="input-group">
+                  <label>
+                    <i className="fas fa-clock"></i>
+                    Charging Duration (hours)
+                  </label>
+                  <input 
+                    type="number" 
+                    min="0.5" 
+                    max="24" 
+                    step="0.5"
+                    value={chargingDuration} 
+                    onChange={(e) => setChargingDuration(Number(e.target.value))} 
+                  />
+                </div>
+                <div className="input-group">
+                  <label>
+                    <i className="fas fa-bicycle"></i>
+                    Mode of Transport
+                  </label>
+                  <select value={transportMode} onChange={(e) => setTransportMode(e.target.value)}>
+                    <option value="Bike">Bike</option>
+                    <option value="Walk">Walk</option>
+                  </select>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button className="cancel-button" onClick={() => setShowModal(false)}>
+                  Cancel
+                </button>
+                <button className="submit-button" onClick={handleModalSubmit}>
+                  Continue to Payment
+                </button>
+              </div>
             </div>
           </div>
         )}
 
-        {/* Display Booking Key */}
-        {bookingKey && (
-          <div className="booking-key-display">
-            <h3>Your Booking Key:</h3>
-            <p>{bookingKey}</p>
+        {/* Enhanced Booking Details Modal */}
+        {showBookingDetails && bookingResponse && (
+          <div className="modal">
+            <div className="modal-content booking-details-modal">
+              <div className="modal-header">
+                <h2>Booking Summary</h2>
+                <button className="close-button" onClick={() => setShowBookingDetails(false)}>
+                  <i className="fas fa-times"></i>
+                </button>
+              </div>
+              <div className="modal-body">
+                <div className="booking-details">
+                  <div className="detail-item">
+                    <i className="fas fa-rupee-sign"></i>
+                    <span>Cost:</span>
+                    <strong>₹{bookingResponse.cost}</strong>
+                  </div>
+                  <div className="detail-item">
+                    <i className="fas fa-play-circle"></i>
+                    <span>Start Time:</span>
+                    <strong>{new Date(bookingResponse.start).toLocaleString()}</strong>
+                  </div>
+                  <div className="detail-item">
+                    <i className="fas fa-stop-circle"></i>
+                    <span>End Time:</span>
+                    <strong>{new Date(bookingResponse.stop).toLocaleString()}</strong>
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button className="cancel-button" onClick={() => setShowBookingDetails(false)}>
+                  Cancel
+                </button>
+                <button className="pay-button" onClick={handlePayment}>
+                  <i className="fas fa-lock"></i> Pay Now
+                </button>
+              </div>
+            </div>
           </div>
+        )}
+
+        {/* Custom Alert */}
+        {showAlert && (
+          <CustomAlert 
+            message={alertMessage} 
+            onClose={() => setShowAlert(false)} 
+          />
         )}
       </div>
 
-      {/* Modal for booking details */}
-      {showModal && (
-        <div className="modal">
-          <div className="modal-content">
-            <h2>Booking Details</h2>
-            <label>
-              Charging Duration (hours):
-              <input 
-                type="number" 
-                min="0.5" 
-                max="24" 
-                step="0.5"
-                value={chargingDuration} 
-                onChange={(e) => setChargingDuration(Number(e.target.value))} 
-              />
-            </label>
-            <label>
-              Mode of Transport:
-              <select value={transportMode} onChange={(e) => setTransportMode(e.target.value)}>
-                <option value="Bike">Bike</option>
-                <option value="Walk">Walk</option>
-              </select>
-            </label>
-            <button onClick={handleModalSubmit}>Submit</button>
-            <button onClick={() => setShowModal(false)}>Cancel</button>
-          </div>
+      {/* Display Booking Key */}
+      {bookingKey && (
+        <div className="booking-key-display">
+          <h3>Your Booking Key:</h3>
+          <p>{bookingKey}</p>
         </div>
       )}
     </div>

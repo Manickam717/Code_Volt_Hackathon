@@ -71,13 +71,12 @@ body {
 
 /* Map Container */
 .map-container {
-  flex: 1;
   position: relative;
-  margin-top: 60px; /* Offset for the fixed header */
-  height: calc(100vh - 60px); /* Full height minus header */
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
 .map-container .google-map {
@@ -87,95 +86,326 @@ body {
 
 .map-container .book-button {
   position: absolute;
-  bottom: 20px; /* Adjust this value to move it down from the top */
-  left: 20px; /* Adjust this value to move it from the left */
-  padding: 12px 24px;
-  background-color: #FF4500;
+  bottom: 30px;
+  left: 30px;
+  padding: 15px 30px;
+  background: linear-gradient(135deg, #1E90FF, #4169E1);
   color: white;
   border: none;
   border-radius: 30px;
   cursor: pointer;
   font-size: 16px;
-  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.3);
-  transition: 0.3s;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(30, 144, 255, 0.3);
+  transition: all 0.3s ease;
+  z-index: 1000;
 }
 
 .map-container .book-button:hover {
-  background-color: #FF6347;
-  transform: scale(1.1);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(30, 144, 255, 0.4);
+  background: linear-gradient(135deg, #4169E1, #1E90FF);
 }
 
-/* Modal Styles */
+/* Enhanced Modal Styles */
 .modal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 2000;
+  backdrop-filter: blur(5px);
 }
 
 .modal-content {
-  background-color: white;
+  background: #fff;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.modal-header {
   padding: 20px;
-  border-radius: 8px;
-  width: 300px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  text-align: center;
+  background: linear-gradient(135deg, #1E90FF, #4169E1);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.modal-content h2 {
-  margin-top: 0;
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
 }
 
-.modal-content label {
+.close-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 5px;
+  transition: transform 0.2s;
+}
+
+.close-button:hover {
+  transform: scale(1.1);
+}
+
+.modal-body {
+  padding: 25px;
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+.input-group label {
   display: block;
-  margin: 10px 0;
+  margin-bottom: 8px;
+  color: #333;
+  font-weight: 500;
 }
 
-.modal-content input,
-.modal-content select {
+.input-group label i {
+  margin-right: 8px;
+  color: #1E90FF;
+}
+
+.input-group input,
+.input-group select {
   width: 100%;
-  padding: 8px;
-  margin-top: 5px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  padding: 12px;
+  border: 2px solid #e1e1e1;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
 }
 
-.modal-content button {
-  margin-top: 15px;
-  padding: 10px 20px;
-  background-color: #1E90FF;
+.input-group input:focus,
+.input-group select:focus {
+  border-color: #1E90FF;
+  outline: none;
+}
+
+.modal-footer {
+  padding: 20px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.submit-button,
+.pay-button,
+.cancel-button {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  border: none;
+}
+
+.submit-button,
+.pay-button {
+  background: linear-gradient(135deg, #1E90FF, #4169E1);
+  color: white;
+}
+
+.cancel-button {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.submit-button:hover,
+.pay-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(30, 144, 255, 0.3);
+}
+
+.cancel-button:hover {
+  background: #e5e5e5;
+}
+
+/* Booking Details Styles */
+.booking-details {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.detail-item i {
+  color: #1E90FF;
+  font-size: 1.2rem;
+}
+
+.detail-item span {
+  color: #666;
+}
+
+.detail-item strong {
+  margin-left: auto;
+  color: #333;
+}
+
+/* Custom Alert Styles */
+.custom-alert {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+  backdrop-filter: blur(5px);
+}
+
+.custom-alert-content {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.alert-icon {
+  font-size: 3rem;
+  color: #00C851;
+  margin-bottom: 20px;
+}
+
+.custom-alert h3 {
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.custom-alert p {
+  color: #666;
+  margin-bottom: 25px;
+  font-size: 1.1rem;
+}
+
+.custom-alert button {
+  padding: 12px 30px;
+  background: linear-gradient(135deg, #1E90FF, #4169E1);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.3s;
 }
 
-.modal-content button:hover {
-  background-color: #1C86EE;
+.custom-alert button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(30, 144, 255, 0.3);
 }
 
-.modal-content button + button {
-  margin-left: 10px;
-  background-color: #FF4500;
-}
-
-.modal-content button + button:hover {
-  background-color: #FF6347;
-}
-
-.booking-key-display {
-  position: fixed;
-  top: 10px;
-  right: 20px;
+/* Info Window Styles */
+.station-info, .user-info {
   padding: 10px;
-  background-color: #f0f0f0;
+  max-width: 250px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.station-info h3, .user-info h3 {
+  color: #1E90FF;
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.station-info p, .user-info p {
+  margin: 5px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  color: white;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error Overlay */
+.error-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  color: white;
+  text-align: center;
+  padding: 20px;
+}
+
+.error-overlay button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background: #3498db;
+  color: white;
+  border: none;
   border-radius: 5px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.error-overlay button:hover {
+  background: #2980b9;
 }
