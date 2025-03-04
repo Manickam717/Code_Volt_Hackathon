@@ -18,11 +18,6 @@ function Home() {
     <div className="h-screen overflow-y-auto">
       <FlowerShower />
       <Hero />
-      <div className="flex justify-center mt-4">
-        <Link to="signup" smooth={true} duration={500} className="px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors duration-200">
-          Sign Up
-        </Link>
-      </div>
       <Element name="chargingExperience" className="element">
         <Chargen />
       </Element>
